@@ -60,4 +60,5 @@ export enum ViewState {
   EMR = 'EMR',
   PHARMACY = 'PHARMACY',
   BILLING = 'BILLING',
+  SETTINGS = 'SETTINGS',
 }

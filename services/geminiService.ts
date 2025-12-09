@@ -9,8 +9,10 @@ export const analyzeClinicalNote = async (noteText: string): Promise<ICDCode[]> 
   if (!apiKey) return [];
 
   const prompt = `
-    Analyze the following clinical note and extract relevant ICD-10 diagnosis codes.
-    Clinical Note: "${noteText}"
+    Analisis catatan klinis berikut dan ekstrak kode diagnosis ICD-10 yang relevan.
+    Catatan Klinis: "${noteText}"
+    
+    Output harus dalam JSON.
   `;
 
   try {
@@ -24,9 +26,9 @@ export const analyzeClinicalNote = async (noteText: string): Promise<ICDCode[]> 
           items: {
             type: Type.OBJECT,
             properties: {
-              code: { type: Type.STRING, description: "The ICD-10 code" },
-              description: { type: Type.STRING, description: "Description of the diagnosis" },
-              confidence: { type: Type.NUMBER, description: "Confidence score between 0 and 1" }
+              code: { type: Type.STRING, description: "Kode ICD-10" },
+              description: { type: Type.STRING, description: "Deskripsi diagnosis dalam Bahasa Indonesia" },
+              confidence: { type: Type.NUMBER, description: "Tingkat keyakinan antara 0 dan 1" }
             },
             required: ["code", "description"]
           }
@@ -57,9 +59,10 @@ export const predictStockNeeds = async (items: InventoryItem[]): Promise<Predict
   }));
 
   const prompt = `
-    Analyze the stock levels and 6-month usage history for these pharmaceutical items. 
-    Predict the demand for next month and recommend action.
-    Context: Current month is October. Be sensitive to trends.
+    Analisis tingkat stok dan riwayat penggunaan 6 bulan untuk item farmasi ini.
+    Prediksi permintaan untuk bulan depan dan berikan rekomendasi.
+    Konteks: Bulan saat ini adalah Oktober. Perhatikan tren musiman.
+    Berikan output dalam Bahasa Indonesia.
     Data: ${JSON.stringify(stockData)}
   `;
 
@@ -77,8 +80,8 @@ export const predictStockNeeds = async (items: InventoryItem[]): Promise<Predict
               itemId: { type: Type.STRING },
               itemName: { type: Type.STRING },
               predictedDemand: { type: Type.NUMBER },
-              recommendation: { type: Type.STRING, description: "Actionable advice (e.g., 'Order 50 units immediately')" },
-              reasoning: { type: Type.STRING, description: "Why this recommendation was made" }
+              recommendation: { type: Type.STRING, description: "Saran tindakan (contoh: 'Pesan 50 unit segera')" },
+              reasoning: { type: Type.STRING, description: "Alasan mengapa rekomendasi ini dibuat" }
             },
             required: ["itemId", "predictedDemand", "recommendation"]
           }
@@ -97,23 +100,23 @@ export const predictStockNeeds = async (items: InventoryItem[]): Promise<Predict
 
 // 3. Conversational Assistant
 export const chatWithERP = async (history: {role: 'user' | 'model', text: string}[], newMessage: string): Promise<string> => {
-  if (!apiKey) return "API Key not configured.";
+  if (!apiKey) return "API Key belum dikonfigurasi.";
 
   try {
     const chat = ai.chats.create({
       model: 'gemini-2.5-flash',
       config: {
-        systemInstruction: `You are Nexus, an advanced Hospital ERP Assistant. 
-        You have access to simulated data regarding:
-        - Total AR (Accounts Receivable)
-        - Bed Occupancy Rates (BOR)
-        - Stock levels of critical drugs
-        - Patient admission stats.
+        systemInstruction: `Anda adalah Nexus, Asisten ERP Rumah Sakit yang canggih.
+        Anda memiliki akses ke data simulasi mengenai:
+        - Total AR (Piutang Usaha)
+        - Tingkat Okupansi Tempat Tidur (BOR)
+        - Tingkat stok obat-obatan kritis
+        - Statistik penerimaan pasien.
         
-        Answer queries professionally, concisely, and use a data-driven tone.
-        If asked about specific numbers, simulate realistic hospital metrics.
-        Current Date: October 2025.
-        Currency: IDR / USD.`
+        Jawablah pertanyaan secara profesional, ringkas, dan gunakan nada berbasis data.
+        Gunakan Bahasa Indonesia yang formal dan sopan.
+        Tanggal Saat Ini: Oktober 2025.
+        Mata Uang: IDR (Rupiah).`
       },
       history: history.map(h => ({
         role: h.role,
@@ -122,9 +125,9 @@ export const chatWithERP = async (history: {role: 'user' | 'model', text: string
     });
 
     const result = await chat.sendMessage({ message: newMessage });
-    return result.text || "I processed that, but have no textual response.";
+    return result.text || "Saya telah memproses itu, tetapi tidak ada respons tekstual.";
   } catch (error) {
     console.error("Gemini Chat Failed:", error);
-    return "I am currently unable to process your request due to a connection issue.";
+    return "Maaf, saya tidak dapat memproses permintaan Anda saat ini karena masalah koneksi.";
   }
 };
